@@ -45,6 +45,10 @@ jobs:
       - name: 同步 Capacitor
         run: npx cap sync android
 
+      - name: 修复 Gradle 脚本执行权限
+        working-directory: android
+        run: chmod +x gradlew gradlew.bat
+
       - name: 构建 Debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
