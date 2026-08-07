@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== 默认主题色 CSS 变量（加载前占位，由 dailyTheme.ts 动态覆盖） ===== */
+:root {
+  /* 默认青苹果主题（第一套配色） */
+  --color-primary-50:  241 248 233;
+  --color-primary-100: 222 237 200;
+  --color-primary-200: 197 224 160;
+  --color-primary-300: 171 211 120;
+  --color-primary-400: 139 195 74;
+  --color-primary-500: 124 179 66;
+  --color-primary-600: 104 159 56;
+  --color-primary-700: 76 136 40;
+  --color-primary-800: 51 105 30;
+  --color-primary-900: 27 66 18;
+  --primary-hex: #8BC34A;
+  --splash-gradient: linear-gradient(180deg, #DCEDC8 0%, #E8F5E9 50%, #F1F8E9 100%);
+  --color-primary: #8BC34A;
+  --color-primary-light: rgba(241,248,233,0.95);
+  --color-primary-hover: #689F38;
+  --color-accent: #FAF2E0;
+  /* 默认文字色（低饱和偏暖，更深更有层次，由 dailyTheme.ts 动态覆盖） */
+  --text-primary: #2A2218;
+  --text-secondary: #4A3F32;
+  --text-muted: #6B5F50;
+  --text-on-accent: #FFFFFF;
+
+  /* ===== 全局派生色默认值（由 dailyTheme.ts 动态覆盖） ===== */
+  /* 设计理念：低饱和、自然有机、柔和温暖、颜色更深 */
+  --bg-page: #F2E8DA;           /* 页面背景：暖米灰（更深） */
+  --bg-card: #FAF3E7;           /* 卡片背景：暖白（更深） */
+  --bg-card-2: #EFE5D5;         /* 次级卡片背景：暖米（更深） */
+  --bg-muted: #E8DCC8;          /* 静默背景：进度槽、次要区域（更深） */
+  --border-card: #D4C5AD;       /* 卡片边框：暖灰（更深） */
+  --border-subtle: rgba(180,165,145,0.5); /* 次级边框：更淡（更深） */
+  --text-heading: #5C4A32;      /* 标题文字：深暖棕（更深） */
+  --accent-btn: #9C6A2E;        /* 主按钮：深琥珀（更深） */
+  --accent-btn-2: #5C5040;      /* 次按钮：深暖灰棕（更深） */
+  --accent-soft: #8A6E4A;       /* 柔和强调：深中暖棕（更深） */
+  --accent-warm: #9C6A2E;       /* 暖强调：深琥珀金（更深） */
+  --accent-warm-soft: #B88A5C;  /* 浅暖强调：深浅琥珀（更深） */
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-page, #F2E8DA);
+  color: var(--text-primary, #2A2218);
+  /* 移动端安全区域 */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 移动端底部导航栏 */
+.mobile-nav {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 触摸优化：增大点击区域 */
+@media (pointer: coarse) {
+  button, [role="button"] {
+    min-height: 36px;
+    min-width: 36px;
+  }
+  /* 防止双击缩放 */
+  * {
+    touch-action: manipulation;
+  }
+}
+
+/* 移动端隐藏滚动条 */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+/* 主题色覆盖 - 使用CSS变量 */
+.bg-primary-500 { background-color: var(--color-primary) !important; }
+.bg-primary-600 { background-color: var(--color-primary-hover) !important; }
+.bg-primary-50 { background-color: var(--color-primary-light) !important; }
+.text-primary-500 { color: var(--color-primary) !important; }
+.text-primary-600 { color: var(--color-primary) !important; }
+.text-primary-700 { color: var(--color-primary) !important; }
+.border-primary-500 { border-color: var(--color-primary) !important; }
+.border-primary { border-color: var(--color-primary) !important; }
+.hover\:bg-primary-600:hover { background-color: var(--color-primary-hover) !important; }
+.hover\:text-primary-500:hover { color: var(--color-primary) !important; }
+
+/* 蓝色进度条覆盖 */
+.bg-blue-500 { background-color: var(--color-primary) !important; }
+.text-blue-500 { color: var(--color-primary) !important; }
+.text-blue-600 { color: var(--color-primary) !important; }
+.text-blue-400 { color: var(--color-primary) !important; }
+.bg-blue-50 { background-color: var(--color-primary-light) !important; }
+
+/* 底部导航当前项 */
+.text-primary-600 { color: var(--color-primary) !important; }
+
+/* 滚动条隐藏 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 3D翻转 */
+.perspective-500 {
+  perspective: 500px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* 暗黑模式（适配低饱和偏暖 gray 色系，更深更有层次） */
+.dark body {
+  background-color: #15110C;
+}
+.dark .bg-white,
+.dark .bg-white\/80 {
+  background-color: #201A12;
+}
+.dark .bg-gray-50 {
+  background-color: #15110C;
+}
+.dark .text-gray-800 {
+  color: #F5F0EA;
+}
+.dark .text-gray-700 {
+  color: #EAE3D9;
+}
+.dark .text-gray-600 {
+  color: #D4C9B8;
+}
+.dark .text-gray-500 {
+  color: #B0A493;
+}
+.dark .text-gray-400 {
+  color: #8A7E6E;
+}
+.dark .border-gray-100 {
+  border-color: #3D3328;
+}
+.dark .border-gray-200 {
+  border-color: #524739;
+}
+.dark .hover\:bg-gray-50:hover {
+  background-color: #201A12;
+}
+.dark .hover\:bg-gray-100:hover {
+  background-color: #201A12;
+}
+.dark .bg-green-50 { background-color: rgba(16,185,129,0.15); }
+.dark .bg-yellow-50 { background-color: rgba(234,179,8,0.15); }
+.dark .bg-purple-50 { background-color: rgba(139,92,246,0.15); }
+.dark .bg-red-50 { background-color: rgba(239,68,68,0.15); }

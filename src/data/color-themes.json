@@ -1,0 +1,746 @@
+{
+  "version": "1.0",
+  "description": "自然系配色主题包 - 适配每日自动轮换",
+  "totalCount": 41,
+  "rotationMode": "daily",
+  "themes": [
+    {
+      "id": "fruit_green_apple",
+      "name": "青苹果",
+      "category": "fruit",
+      "description": "清新酸甜，最贴近原界面的绿色基调",
+      "colors": {
+        "bgPrimary": "#DCEDC8",
+        "bgSecondary": "#AED581",
+        "accent": "#8BC34A",
+        "accentDark": "#689F38",
+        "accentDeep": "#33691E"
+      },
+      "textColors": {
+        "onLight": "#1B5E20",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_peach",
+      "name": "蜜桃",
+      "category": "fruit",
+      "description": "柔软粉橙，带一丝甜蜜的暖意",
+      "colors": {
+        "bgPrimary": "#FFF3E0",
+        "bgSecondary": "#FFCCBC",
+        "accent": "#FF8A65",
+        "accentDark": "#E64A19",
+        "accentDeep": "#BF360C"
+      },
+      "textColors": {
+        "onLight": "#BF360C",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_blueberry",
+      "name": "蓝莓",
+      "category": "fruit",
+      "description": "深紫沉静，浆果的神秘与优雅",
+      "colors": {
+        "bgPrimary": "#EDE7F6",
+        "bgSecondary": "#B39DDB",
+        "accent": "#7E57C2",
+        "accentDark": "#5E35B1",
+        "accentDeep": "#311B92"
+      },
+      "textColors": {
+        "onLight": "#311B92",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_lemon",
+      "name": "柠檬",
+      "category": "fruit",
+      "description": "明亮通透，像清晨第一缕阳光",
+      "colors": {
+        "bgPrimary": "#FFFDE7",
+        "bgSecondary": "#FFF176",
+        "accent": "#FFD54F",
+        "accentDark": "#FFB300",
+        "accentDeep": "#FF8F00"
+      },
+      "textColors": {
+        "onLight": "#FF8F00",
+        "onAccent": "#3E2723",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_watermelon",
+      "name": "西瓜",
+      "category": "fruit",
+      "description": "红绿撞色，盛夏的清凉与热情",
+      "colors": {
+        "bgPrimary": "#FFCDD2",
+        "bgSecondary": "#EF5350",
+        "accent": "#C62828",
+        "accentDark": "#A5D6A7",
+        "accentDeep": "#2E7D32"
+      },
+      "textColors": {
+        "onLight": "#B71C1C",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_grape",
+      "name": "葡萄",
+      "category": "fruit",
+      "description": "浓郁紫韵，成熟果实的醇厚",
+      "colors": {
+        "bgPrimary": "#F3E5F5",
+        "bgSecondary": "#CE93D8",
+        "accent": "#AB47BC",
+        "accentDark": "#8E24AA",
+        "accentDeep": "#4A148C"
+      },
+      "textColors": {
+        "onLight": "#4A148C",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_clear_sky",
+      "name": "晴空万里",
+      "category": "weather",
+      "description": "通透天蓝，万里无云的开阔心境",
+      "colors": {
+        "bgPrimary": "#E1F5FE",
+        "bgSecondary": "#81D4FA",
+        "accent": "#29B6F6",
+        "accentDark": "#0288D1",
+        "accentDeep": "#0277BD"
+      },
+      "textColors": {
+        "onLight": "#01579B",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_light_rain",
+      "name": "微雨薄暮",
+      "category": "weather",
+      "description": "灰蓝雾蒙，细雨中的安静沉思",
+      "colors": {
+        "bgPrimary": "#ECEFF1",
+        "bgSecondary": "#B0BEC5",
+        "accent": "#78909C",
+        "accentDark": "#546E7A",
+        "accentDeep": "#37474F"
+      },
+      "textColors": {
+        "onLight": "#37474F",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_warm_sun",
+      "name": "暖阳午后",
+      "category": "weather",
+      "description": "蜜糖金橙，慵懒温暖的午后阳光",
+      "colors": {
+        "bgPrimary": "#FFF8E1",
+        "bgSecondary": "#FFE082",
+        "accent": "#FFB74D",
+        "accentDark": "#FF9800",
+        "accentDeep": "#E65100"
+      },
+      "textColors": {
+        "onLight": "#E65100",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_morning_fog",
+      "name": "晨雾弥漫",
+      "category": "weather",
+      "description": "柔和灰阶，朦胧中的留白诗意",
+      "colors": {
+        "bgPrimary": "#F5F5F5",
+        "bgSecondary": "#E0E0E0",
+        "accent": "#BDBDBD",
+        "accentDark": "#9E9E9E",
+        "accentDeep": "#757575"
+      },
+      "textColors": {
+        "onLight": "#424242",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_fresh_green",
+      "name": "雨后新绿",
+      "category": "weather",
+      "description": "洗净的翠绿，与原界面绿色系一脉相承",
+      "colors": {
+        "bgPrimary": "#E8F5E9",
+        "bgSecondary": "#A5D6A7",
+        "accent": "#66BB6A",
+        "accentDark": "#388E3C",
+        "accentDeep": "#1B5E20"
+      },
+      "textColors": {
+        "onLight": "#1B5E20",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_first_snow",
+      "name": "初雪将至",
+      "category": "weather",
+      "description": "冰晶蓝白，寒意中透着纯净",
+      "colors": {
+        "bgPrimary": "#E3F2FD",
+        "bgSecondary": "#90CAF9",
+        "accent": "#64B5F6",
+        "accentDark": "#42A5F5",
+        "accentDeep": "#1565C0"
+      },
+      "textColors": {
+        "onLight": "#0D47A1",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_sunset",
+      "name": "晚霞余晖",
+      "category": "nature",
+      "description": "金橙渐赤，天际燃烧的壮丽告别",
+      "colors": {
+        "bgPrimary": "#FFE0B2",
+        "bgSecondary": "#FFAB91",
+        "accent": "#FF8A65",
+        "accentDark": "#E64A19",
+        "accentDeep": "#BF360C"
+      },
+      "textColors": {
+        "onLight": "#BF360C",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_snow_mountain",
+      "name": "雪山之巅",
+      "category": "nature",
+      "description": "冰白映蓝，圣洁高远的凛冽纯净",
+      "colors": {
+        "bgPrimary": "#FAFAFA",
+        "bgSecondary": "#E1F5FE",
+        "accent": "#B3E5FC",
+        "accentDark": "#81D4FA",
+        "accentDeep": "#01579B"
+      },
+      "textColors": {
+        "onLight": "#01579B",
+        "onAccent": "#01579B",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_deep_forest",
+      "name": "深林秘境",
+      "category": "nature",
+      "description": "层层叠翠，原始森林的幽深与生机",
+      "colors": {
+        "bgPrimary": "#DCEDC8",
+        "bgSecondary": "#9CCC65",
+        "accent": "#4CAF50",
+        "accentDark": "#2E7D32",
+        "accentDeep": "#1B5E20"
+      },
+      "textColors": {
+        "onLight": "#1B5E20",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_grassland",
+      "name": "辽阔草原",
+      "category": "nature",
+      "description": "金黄缀绿，风吹草低的无垠旷野",
+      "colors": {
+        "bgPrimary": "#F9FBE7",
+        "bgSecondary": "#E6EE9C",
+        "accent": "#C0CA33",
+        "accentDark": "#827717",
+        "accentDeep": "#33691E"
+      },
+      "textColors": {
+        "onLight": "#33691E",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_deep_sea",
+      "name": "深海蔚蓝",
+      "category": "nature",
+      "description": "青蓝交织，海浪深处的静谧力量",
+      "colors": {
+        "bgPrimary": "#E0F7FA",
+        "bgSecondary": "#80DEEA",
+        "accent": "#26C6DA",
+        "accentDark": "#00838F",
+        "accentDeep": "#004D40"
+      },
+      "textColors": {
+        "onLight": "#004D40",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_cherry_blossom",
+      "name": "樱花初绽",
+      "category": "nature",
+      "description": "粉霞漫天，花瓣飘落的温柔瞬间",
+      "colors": {
+        "bgPrimary": "#FCE4EC",
+        "bgSecondary": "#F8BBD0",
+        "accent": "#F48FB1",
+        "accentDark": "#EC407A",
+        "accentDeep": "#880E4F"
+      },
+      "textColors": {
+        "onLight": "#880E4F",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_wheat_field",
+      "name": "麦田金黄",
+      "category": "nature",
+      "description": "暖黄丰盈，丰收时节的大地馈赠",
+      "colors": {
+        "bgPrimary": "#FFFDE7",
+        "bgSecondary": "#F0F4C3",
+        "accent": "#D4E157",
+        "accentDark": "#C0CA33",
+        "accentDeep": "#827717"
+      },
+      "textColors": {
+        "onLight": "#827717",
+        "onAccent": "#3E2723",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_earth_soil",
+      "name": "大地泥土",
+      "category": "nature",
+      "description": "温润棕褐，脚踏实地的厚重与包容",
+      "colors": {
+        "bgPrimary": "#EFEBE9",
+        "bgSecondary": "#D7CCC8",
+        "accent": "#A1887F",
+        "accentDark": "#6D4C41",
+        "accentDeep": "#3E2723"
+      },
+      "textColors": {
+        "onLight": "#3E2723",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_strawberry",
+      "name": "草莓",
+      "category": "fruit",
+      "description": "鲜红欲滴，初夏最甜美的悸动",
+      "colors": {
+        "bgPrimary": "#FFEBEE",
+        "bgSecondary": "#FFCDD2",
+        "accent": "#EF5350",
+        "accentDark": "#C62828",
+        "accentDeep": "#B71C1C"
+      },
+      "textColors": {
+        "onLight": "#B71C1C",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_avocado",
+      "name": "牛油果",
+      "category": "fruit",
+      "description": "外绿内黄，绵密细腻的健康之选",
+      "colors": {
+        "bgPrimary": "#F1F8E9",
+        "bgSecondary": "#C5E1A5",
+        "accent": "#7CB342",
+        "accentDark": "#558B2F",
+        "accentDeep": "#33691E"
+      },
+      "textColors": {
+        "onLight": "#33691E",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_cherry",
+      "name": "樱桃",
+      "category": "fruit",
+      "description": "深红如玛瑙，小巧中藏着浓郁甘甜",
+      "colors": {
+        "bgPrimary": "#FCE4EC",
+        "bgSecondary": "#F48FB1",
+        "accent": "#C2185B",
+        "accentDark": "#AD1457",
+        "accentDeep": "#560027"
+      },
+      "textColors": {
+        "onLight": "#560027",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_orange",
+      "name": "橙子",
+      "category": "fruit",
+      "description": "饱满圆润，阳光浓缩成的甘甜",
+      "colors": {
+        "bgPrimary": "#FFF3E0",
+        "bgSecondary": "#FFCC80",
+        "accent": "#FB8C00",
+        "accentDark": "#EF6C00",
+        "accentDeep": "#E65100"
+      },
+      "textColors": {
+        "onLight": "#E65100",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_dragon_fruit",
+      "name": "火龙果",
+      "category": "fruit",
+      "description": "外粉内白，热带奇果的视觉盛宴",
+      "colors": {
+        "bgPrimary": "#FCE4EC",
+        "bgSecondary": "#F8BBD0",
+        "accent": "#EC407A",
+        "accentDark": "#C2185B",
+        "accentDeep": "#880E4F"
+      },
+      "textColors": {
+        "onLight": "#880E4F",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_kiwi",
+      "name": "猕猴桃",
+      "category": "fruit",
+      "description": "翠绿果肉嵌黑籽，酸甜清新的质感",
+      "colors": {
+        "bgPrimary": "#F1F8E9",
+        "bgSecondary": "#DCEDC8",
+        "accent": "#9CCC65",
+        "accentDark": "#558B2F",
+        "accentDeep": "#2E7D32"
+      },
+      "textColors": {
+        "onLight": "#2E7D32",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "fruit_pomegranate",
+      "name": "石榴",
+      "category": "fruit",
+      "description": "粒粒如红宝石，破壳而出的丰盈",
+      "colors": {
+        "bgPrimary": "#FFEBEE",
+        "bgSecondary": "#EF9A9A",
+        "accent": "#D32F2F",
+        "accentDark": "#B71C1C",
+        "accentDeep": "#7F0000"
+      },
+      "textColors": {
+        "onLight": "#7F0000",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_thunderstorm",
+      "name": "雷雨交加",
+      "category": "weather",
+      "description": "墨云翻涌电光闪，暴风骤雨的磅礴",
+      "colors": {
+        "bgPrimary": "#ECEFF1",
+        "bgSecondary": "#90A4AE",
+        "accent": "#455A64",
+        "accentDark": "#263238",
+        "accentDeep": "#0D1B2A"
+      },
+      "textColors": {
+        "onLight": "#263238",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_rainbow",
+      "name": "彩虹初现",
+      "category": "weather",
+      "description": "雨后天穹七彩桥，希望与美好的交汇",
+      "colors": {
+        "bgPrimary": "#E3F2FD",
+        "bgSecondary": "#BBDEFB",
+        "accent": "#42A5F5",
+        "accentDark": "#1E88E5",
+        "accentDeep": "#1565C0"
+      },
+      "textColors": {
+        "onLight": "#0D47A1",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_autumn_sky",
+      "name": "秋日高远",
+      "category": "weather",
+      "description": "天高云淡金风爽，秋空的澄澈辽远",
+      "colors": {
+        "bgPrimary": "#FFF8E1",
+        "bgSecondary": "#FFECB3",
+        "accent": "#FFB300",
+        "accentDark": "#FF8F00",
+        "accentDeep": "#E65100"
+      },
+      "textColors": {
+        "onLight": "#E65100",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_plum_rain",
+      "name": "梅雨季节",
+      "category": "weather",
+      "description": "连绵细雨润青苔，江南烟雨的朦胧",
+      "colors": {
+        "bgPrimary": "#E0F2F1",
+        "bgSecondary": "#B2DFDB",
+        "accent": "#4DB6AC",
+        "accentDark": "#00897B",
+        "accentDeep": "#004D40"
+      },
+      "textColors": {
+        "onLight": "#004D40",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "weather_aurora",
+      "name": "极光夜空",
+      "category": "weather",
+      "description": "极地夜幕绿光舞，神秘天幕的奇迹",
+      "colors": {
+        "bgPrimary": "#E8F5E9",
+        "bgSecondary": "#A5D6A7",
+        "accent": "#2E7D32",
+        "accentDark": "#1B5E20",
+        "accentDeep": "#0D2818"
+      },
+      "textColors": {
+        "onLight": "#0D2818",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_autumn_leaves",
+      "name": "红叶满山",
+      "category": "nature",
+      "description": "层林尽染万山红，秋色浓烈的壮美",
+      "colors": {
+        "bgPrimary": "#FBE9E7",
+        "bgSecondary": "#FFAB91",
+        "accent": "#D84315",
+        "accentDark": "#BF360C",
+        "accentDeep": "#8D2A06"
+      },
+      "textColors": {
+        "onLight": "#8D2A06",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_bamboo_grove",
+      "name": "竹林清韵",
+      "category": "nature",
+      "description": "翠竹摇曳影婆娑，清幽雅致的东方意境",
+      "colors": {
+        "bgPrimary": "#E8F5E9",
+        "bgSecondary": "#C8E6C9",
+        "accent": "#4CAF50",
+        "accentDark": "#388E3C",
+        "accentDeep": "#1B5E20"
+      },
+      "textColors": {
+        "onLight": "#1B5E20",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_coral_reef",
+      "name": "珊瑚礁",
+      "category": "nature",
+      "description": "海底花园斑斓色，热带海域的缤纷生态",
+      "colors": {
+        "bgPrimary": "#FFF3E0",
+        "bgSecondary": "#FFAB91",
+        "accent": "#FF7043",
+        "accentDark": "#F4511E",
+        "accentDeep": "#BF360C"
+      },
+      "textColors": {
+        "onLight": "#BF360C",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_firefly_night",
+      "name": "萤火虫夜",
+      "category": "nature",
+      "description": "暗林深处点点光，夏夜精灵的微光舞会",
+      "colors": {
+        "bgPrimary": "#1B2A1B",
+        "bgSecondary": "#2E4A2E",
+        "accent": "#8BC34A",
+        "accentDark": "#689F38",
+        "accentDeep": "#33691E"
+      },
+      "textColors": {
+        "onLight": "#DCEDC8",
+        "onAccent": "#1B2A1B",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_polar_glacier",
+      "name": "极地冰川",
+      "category": "nature",
+      "description": "千年寒冰幽蓝光，极地大陆的亘古寂静",
+      "colors": {
+        "bgPrimary": "#E0F7FA",
+        "bgSecondary": "#B2EBF2",
+        "accent": "#00BCD4",
+        "accentDark": "#0097A7",
+        "accentDeep": "#006064"
+      },
+      "textColors": {
+        "onLight": "#006064",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_rainforest",
+      "name": "热带雨林",
+      "category": "nature",
+      "description": "藤蔓缠绕层叠翠，生命最浓烈的绿色迷宫",
+      "colors": {
+        "bgPrimary": "#E8F5E9",
+        "bgSecondary": "#81C784",
+        "accent": "#2E7D32",
+        "accentDark": "#1B5E20",
+        "accentDeep": "#0D3010"
+      },
+      "textColors": {
+        "onLight": "#0D3010",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_lake_mountain",
+      "name": "湖光山色",
+      "category": "nature",
+      "description": "碧水倒映青山影，天地相融的宁静画卷",
+      "colors": {
+        "bgPrimary": "#E0F7FA",
+        "bgSecondary": "#80DEEA",
+        "accent": "#00838F",
+        "accentDark": "#006064",
+        "accentDeep": "#003D40"
+      },
+      "textColors": {
+        "onLight": "#003D40",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_lavender_field",
+      "name": "薰衣草田",
+      "category": "nature",
+      "description": "紫色花海随风涌，普罗旺斯的浪漫气息",
+      "colors": {
+        "bgPrimary": "#F3E5F5",
+        "bgSecondary": "#CE93D8",
+        "accent": "#8E24AA",
+        "accentDark": "#6A1B9A",
+        "accentDeep": "#38006B"
+      },
+      "textColors": {
+        "onLight": "#38006B",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    },
+    {
+      "id": "nature_desert_dunes",
+      "name": "沙漠沙丘",
+      "category": "nature",
+      "description": "金沙连绵接天际，荒原大漠的苍茫壮阔",
+      "colors": {
+        "bgPrimary": "#FFFDE7",
+        "bgSecondary": "#FFE082",
+        "accent": "#D4A017",
+        "accentDark": "#A8730C",
+        "accentDeep": "#6D4C10"
+      },
+      "textColors": {
+        "onLight": "#6D4C10",
+        "onAccent": "#FFFFFF",
+        "onDark": "#FFFFFF"
+      }
+    }
+  ]
+}

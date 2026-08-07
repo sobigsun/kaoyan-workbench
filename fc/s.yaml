@@ -1,0 +1,39 @@
+# 阿里云函数计算部署配置（Serverless Devs）
+# 使用前：1. npm i -g @serverless-devs/s  2. s config add 配置密钥
+# 部署：s deploy
+# 环境变量 OSS_AK_ID / OSS_AK_SECRET 从本地环境读取，勿提交到代码库
+
+edition: 3.0.0
+name: kaoyan-sync
+access: default
+
+vars:
+  region: cn-hangzhou
+
+resources:
+  sync-api:
+    component: fc3
+    props:
+      region: ${vars.region}
+      functionName: kaoyan-sync
+      description: 考研工作台数据同步API
+      runtime: nodejs18
+      code: ./
+      handler: index.handler
+      memorySize: 256
+      timeout: 30
+      instanceConcurrency: 1
+      environmentVariables:
+        OSS_REGION: oss-cn-hangzhou
+        OSS_AK_ID: ${env(OSS_AK_ID)}
+        OSS_AK_SECRET: ${env(OSS_AK_SECRET)}
+        OSS_BUCKET: kaoyan-sync-data
+      triggers:
+        - triggerName: http-trigger
+          triggerType: http
+          triggerConfig:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
+              - OPTIONS

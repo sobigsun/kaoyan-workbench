@@ -1,0 +1,9 @@
+{
+  "name": "kaoyan-fc-sync",
+  "version": "1.0.0",
+  "description": "考研工作台数据同步 - 阿里云函数计算版",
+  "main": "index.js",
+  "dependencies": {
+    "ali-oss": "^6.20.0"
+  }
+}

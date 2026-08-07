@@ -1,0 +1,25 @@
+{
+  "name": "考研工作台",
+  "short_name": "考研台",
+  "description": "考研学习管理工具 - 学习记录、金币成长、番茄钟、AI助手",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2E8DA",
+  "theme_color": "#B88A5C",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

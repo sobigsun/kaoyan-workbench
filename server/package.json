@@ -1,0 +1,9 @@
+{
+  "name": "kaoyan-workbench-server",
+  "version": "1.0.0",
+  "description": "考研工作台数据同步服务器（零依赖）",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  }
+}

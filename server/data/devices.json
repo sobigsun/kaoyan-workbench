@@ -1,0 +1,19 @@
+{
+  "devices": {
+    "dev_msh4uu82xbzxo9": {
+      "data": {
+        "settings": {
+          "targetDate": "2026-12-26"
+        },
+        "words": [
+          {
+            "id": "w1",
+            "word": "test"
+          }
+        ]
+      },
+      "updatedAt": 1785998224840,
+      "deviceName": "????"
+    }
+  }
+}
