@@ -39,26 +39,67 @@ interface CoinParticle {
   drift: number;    // 水平漂移 px
   duration: number; // 动画 ms
   delay: number;    // 延迟 ms
-  text: string;     // 文字，如 "+🪙1" / "+🪙0.5" / "-🪙20"
-  color: string;    // 颜色 class
+  // 注意：原来的 text 字段用了 🪙 emoji，部分安卓 WebView 字体缺 glyph 会显示成方框
+  // 现在拆成 3 个字段，用 SVG 金币图标渲染
+  sign: '+' | '-';   // 正负号
+  suffix: string;    // 数字（如 "1" / "0.5" / "20"）
+  isNegative: boolean; // 颜色分支
 }
 
-// 粒子颜色（默认统一金币金黄色）
-const COIN_COLOR_POS = 'text-yellow-500';
-const COIN_COLOR_NEG = 'text-red-400';
+// SVG 金币图标（尺寸按 1em = 当前 font-size 缩放）
+// - 外层金黄渐变圆边框
+// - 内部 ¥ 符号（考研主题也贴合人民币感觉）
+function CoinSvg({ negative = false }: { negative?: boolean }) {
+  const stroke = negative ? '#f87171' : '#d97706'; // 红-600 / 琥珀-600
+  const face   = negative ? '#fecaca' : '#fde68a'; // 红-200 / 琥珀-200
+  const shine  = negative ? '#fee2e2' : '#fef3c7'; // 高光
+  const symbol = negative ? '#991b1b' : '#92400e'; // 中心 ¥ 字颜色
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      aria-hidden
+      style={{ display: 'inline-block', verticalAlign: '-0.15em', marginRight: 2 }}
+    >
+      <defs>
+        <radialGradient id={`coin-g-${negative ? 'n' : 'p'}`} cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor={shine} />
+          <stop offset="55%" stopColor={face} />
+          <stop offset="100%" stopColor={stroke} />
+        </radialGradient>
+      </defs>
+      {/* 外圈：边框 + 内阴影（厚度感） */}
+      <circle cx="12" cy="12" r="10.5" fill={`url(#coin-g-${negative ? 'n' : 'p'})`} stroke={stroke} strokeWidth="1.2" />
+      <circle cx="12" cy="12" r="8.2" fill="none" stroke={stroke} strokeWidth="0.6" opacity="0.55" />
+      {/* ¥ 符号，居中 */}
+      <text
+        x="12"
+        y="16.2"
+        textAnchor="middle"
+        fontSize="10.5"
+        fontWeight="900"
+        fill={symbol}
+        fontFamily="system-ui, -apple-system, Arial, sans-serif"
+        style={{ paintOrder: 'stroke' }}
+      >
+        ¥
+      </text>
+    </svg>
+  );
+}
 
 /**
  * 把一次 amount 拆成粒子：
- * - 非整数（如 0.5）→ 单个粒子显示 "+🪙0.5"
- * - 整数且 ≤ 20 → N 个 +🪙1
- * - 整数且 > 20 → 20 个 +🪙1 + 1 个 "+🪙剩余"
+ * - 非整数（如 0.5）→ 单个粒子
+ * - 整数且 ≤ 20 → N 个 +1
+ * - 整数且 > 20 → 20 个 +1 + 1 个剩余
  */
 function splitToParticles(item: FloatItem): CoinParticle[] {
   const amt = item.amount;
   const absAmt = Math.abs(amt);
   const isNegative = amt < 0;
-  const sign = isNegative ? '-' : '+';
-  const color = isNegative ? COIN_COLOR_NEG : COIN_COLOR_POS;
+  const sign: '+' | '-' = isNegative ? '-' : '+';
 
   const parts: CoinParticle[] = [];
 
@@ -68,8 +109,9 @@ function splitToParticles(item: FloatItem): CoinParticle[] {
     drift: (Math.random() - 0.5) * 25,
     duration: 2400 + Math.random() * 1200,
     delay: extraDelay,
-    text: `${sign}🪙${suffix}`,
-    color,
+    sign,
+    suffix,
+    isNegative,
   });
 
   if (!Number.isInteger(absAmt)) {
@@ -88,7 +130,43 @@ function splitToParticles(item: FloatItem): CoinParticle[] {
   return parts;
 }
 
-// ========== 2. 升级大字（🎉 升到 Lv.X！） ==========
+// SVG 礼花图标（替代 emoji 🎉，保证安卓 WebView 不显示方框）
+function ConfettiSvg() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      width="1em"
+      height="1em"
+      aria-hidden
+      style={{ display: 'inline-block', verticalAlign: '-0.1em', marginRight: 6 }}
+    >
+      {/* 礼花筒主体 */}
+      <path
+        d="M14 30c0-2 6-14 6-14h8s6 12 6 14v2H14v-2z"
+        fill="#f59e0b"
+        stroke="#b45309"
+        strokeWidth="1.2"
+      />
+      {/* 礼花筒底座 */}
+      <path d="M12 32h24l-3 10H15l-3-10z" fill="#0ea5e9" stroke="#075985" strokeWidth="1.2" />
+      {/* 底座装饰线 */}
+      <path d="M16 34h16" stroke="#075985" strokeWidth="1" opacity="0.55" />
+      {/* 喷射的碎纸（各种颜色形状） */}
+      <circle cx="10" cy="18" r="1.6" fill="#ef4444" />
+      <circle cx="14" cy="10" r="2" fill="#3b82f6" />
+      <rect x="19" y="6" width="3" height="4" rx="0.6" fill="#10b981" transform="rotate(15 20 8)" />
+      <circle cx="24" cy="4" r="2.2" fill="#f59e0b" />
+      <rect x="28" y="7" width="2.6" height="4.5" rx="0.5" fill="#ec4899" transform="rotate(-20 29 9)" />
+      <circle cx="34" cy="11" r="1.6" fill="#8b5cf6" />
+      <circle cx="38" cy="18" r="1.8" fill="#14b8a6" />
+      <rect x="40" y="22" width="2.6" height="4" rx="0.5" fill="#f97316" transform="rotate(25 41 24)" />
+      <rect x="5" y="24" width="2.4" height="3.6" rx="0.4" fill="#6366f1" transform="rotate(-30 6 26)" />
+      <path d="M24 18v-9" stroke="#f59e0b" strokeWidth="1.2" strokeDasharray="1.5 1.5" />
+    </svg>
+  );
+}
+
+// ========== 2. 升级大字（升到 Lv.X！） ==========
 
 interface LevelUpItem {
   id: number;
@@ -145,21 +223,25 @@ export function FloatingPoints() {
 
   return (
     <>
-      {/* A. 漂浮金币 */}
+      {/* A. 漂浮金币（SVG + 数字，完全不依赖 emoji，避免安卓显示成方框） */}
       {coins.length > 0 && (
         <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
           {coins.map((p) => (
             <span
               key={p.id}
-              className={`absolute font-bold text-xl ${p.color} select-none drop-shadow-sm`}
+              className={`absolute font-bold text-xl select-none drop-shadow-sm ${
+                p.isNegative ? 'text-red-500' : 'text-amber-600'
+              }`}
               style={{
                 left: `${p.startX}%`,
                 bottom: '5%',
                 animation: `coinFloat ${p.duration}ms ease-out ${p.delay}ms forwards`,
                 ['--drift' as string]: `${p.drift}px`,
+                whiteSpace: 'nowrap',
               }}
             >
-              {p.text}
+              <CoinSvg negative={p.isNegative} />
+              <span>{p.sign}{p.suffix}</span>
             </span>
           ))}
           <style>{`
@@ -190,7 +272,7 @@ export function FloatingPoints() {
                   margin: '-40%',
                 }}
               />
-              {/* 主文字 */}
+              {/* 主文字（礼花图标用 SVG，避免 emoji 显示方框） */}
               <div
                 className="relative text-center select-none"
                 style={{
@@ -204,11 +286,16 @@ export function FloatingPoints() {
                   letterSpacing: '0.02em',
                 }}
               >
-                🎉 升到 Lv.{pop.newLevel}！
+                <span style={{ WebkitTextFillColor: 'initial' }}>
+                  <ConfettiSvg />
+                </span>
+                升到 Lv.{pop.newLevel}！
               </div>
               <div className="text-center text-white/95 mt-2 font-semibold"
                 style={{ fontSize: 'clamp(14px, 1.6vw, 20px)', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                继续加油，考研路上越来越厉害啦 ✨
+                继续加油，考研路上越来越厉害啦{' '}
+                {/* ✨ 也换成 2 个 SVG 小星星，避免 emoji 方框 */}
+                <span aria-hidden>★</span>
               </div>
               {/* 五彩纸屑（4 个小圆点） */}
               {Array.from({ length: 12 }).map((_, i) => {

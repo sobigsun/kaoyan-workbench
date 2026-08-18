@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { AppData, ModuleType } from '../types';
+import { AppData, ModuleType, PlanTask, StudyPlan } from '../types';
 import { todayStr, addDays, formatDate } from '../utils/date';
 import { getModuleLabels, getModuleColors, getModuleHex, getModuleLightColors } from '../utils/modules';
+import { awardTaskDone } from '../utils/pointsLogic';
+import { emitFloatPoints } from '../components/FloatingPoints';
 
 interface StudyRecordsProps {
   data: AppData;
@@ -60,6 +62,70 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
   // 持久化自定义日期分页
   const persistCustomDates = (next: string[]) => {
     onUpdateData({ ...data, customDateTabs: next });
+  };
+
+  // ===== 补充任务弹窗 =====
+  // supplementDate: 要补充到哪一天（null = 弹窗关闭）
+  const [supplementDate, setSupplementDate] = useState<string | null>(null);
+  const [supplementModule, setSupplementModule] = useState<ModuleType>(activeModule);
+  const [supplementContent, setSupplementContent] = useState('');
+  const [supplementDone, setSupplementDone] = useState(true); // 默认已完成，因为是"补录"昨天做好了的
+
+  // 每次打开发送器弹窗，重置表单（科目默认跟随当前选中的 activeModule）
+  const openSupplement = (date: string) => {
+    setSupplementDate(date);
+    setSupplementModule(activeModule);
+    setSupplementContent('');
+    setSupplementDone(true);
+  };
+  const closeSupplement = () => {
+    setSupplementDate(null);
+    setSupplementContent('');
+  };
+
+  // 保存补充任务
+  const saveSupplement = () => {
+    if (!supplementDate) return;
+    const content = supplementContent.trim();
+    if (!content) return;
+    const moduleId = supplementModule;
+    // 生成不重复的任务 ID：Date.now() + 随机后缀，避免快速补多个任务撞 ID
+    const taskId = `${supplementDate}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+    const task: PlanTask = {
+      id: taskId,
+      module: moduleId,
+      content,
+      done: supplementDone,
+    };
+
+    // 1) 写入对应日期的 StudyPlan.tasks
+    const existingPlan = data.plans.find((p) => p.date === supplementDate);
+    let newPlans: StudyPlan[];
+    if (existingPlan) {
+      newPlans = data.plans.map((p) =>
+        p.date === supplementDate ? { ...p, tasks: [...p.tasks, task] } : p
+      );
+    } else {
+      newPlans = [
+        ...data.plans,
+        { id: `plan_${supplementDate}_${Date.now().toString(36)}`, date: supplementDate, tasks: [task] },
+      ];
+    }
+
+    let next: AppData = { ...data, plans: newPlans };
+
+    // 2) 如果补的是"已完成"，按任务完成规则发金币（awardedTaskIds 防重复，这里 ID 是新的所以一定发）
+    if (supplementDone) {
+      const wasAwarded = next.points.awardedTaskIds.includes(taskId);
+      next = awardTaskDone(next, taskId);
+      // 触发漂浮金币动画（与首页打勾完成任务效果一致）
+      if (!wasAwarded) {
+        emitFloatPoints(10, '完成任务');
+      }
+    }
+
+    onUpdateData(next);
+    closeSupplement();
   };
 
   // 当前选择的时间范围内所有日期
@@ -123,8 +189,12 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
     };
   }, [dailyRecords]);
 
-  // 切换任务完成状态
+  // 切换任务完成状态（与首页 Dashboard 行为一致：首次标记完成 → 发金币 + 漂浮动画）
   const toggleTask = (date: string, taskId: string) => {
+    const plan = data.plans.find((p) => p.date === date);
+    const task = plan?.tasks.find((t) => t.id === taskId);
+    const willBeDone = !task?.done;
+
     const newPlans = data.plans.map((p) => {
       if (p.date !== date) return p;
       return {
@@ -132,7 +202,19 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
         tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, done: !t.done } : t)),
       };
     });
-    onUpdateData({ ...data, plans: newPlans });
+
+    let next: AppData = { ...data, plans: newPlans };
+
+    if (willBeDone) {
+      // 金币发放 & 记录 awardedTaskIds（重复打勾不会重复发）
+      const wasAwarded = next.points.awardedTaskIds.includes(taskId);
+      next = awardTaskDone(next, taskId);
+      if (!wasAwarded) {
+        emitFloatPoints(10, '完成任务');
+      }
+    }
+
+    onUpdateData(next);
   };
 
   // 日历状态
@@ -165,8 +247,10 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
     };
     moduleLabel: string;
     colorClasses: { text: string; solid: string };
+    /** 点击「+补充任务」按钮 */
+    onSupplement?: (date: string) => void;
   }) => {
-    const { record, moduleLabel, colorClasses } = props;
+    const { record, moduleLabel, colorClasses, onSupplement } = props;
     const isToday = record.date === today;
     const [expanded, setExpanded] = useState(true);
 
@@ -181,6 +265,12 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
             {isToday && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
                 今天
+              </span>
+            )}
+            {/* 非今日：显示"补"角标，提示可以补录 */}
+            {!isToday && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 border border-amber-100">
+                可补录
               </span>
             )}
           </div>
@@ -218,7 +308,17 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
         {/* 任务列表：展开时显示 */}
         {expanded && (
           record.tasks.length === 0 ? (
-            <p className="text-xs text-gray-400 py-1">当天无{moduleLabel}任务</p>
+            <div className="py-3 flex flex-col items-center justify-center gap-2">
+              <p className="text-xs text-gray-400">当天无{moduleLabel}任务</p>
+              {!isToday && onSupplement && (
+                <button
+                  onClick={() => onSupplement(record.date)}
+                  className="text-xs px-3 py-1.5 rounded-full border border-dashed border-amber-300 text-amber-600 hover:bg-amber-50 transition-colors"
+                >
+                  + 补充昨天忘记写的任务
+                </button>
+              )}
+            </div>
           ) : (
             <div className="space-y-1.5">
               {record.tasks.map((task) => (
@@ -247,10 +347,22 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
           )
         )}
 
-        {/* 底部统计 */}
-        <div className="flex items-center gap-3 mt-2.5 pt-2.5 border-t border-gray-50 text-xs text-gray-400">
-          <span>⏱ {record.duration > 0 ? `${record.duration}分钟` : '无记录'}</span>
-          <span>🍅 {record.pomodoroCount} 次</span>
+        {/* 底部统计 + 补充任务按钮（仅非今日显示） */}
+        <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-gray-50 text-xs text-gray-400">
+          <div className="flex items-center gap-3">
+            <span>⏱ {record.duration > 0 ? `${record.duration}分钟` : '无记录'}</span>
+            <span>🍅 {record.pomodoroCount} 次</span>
+          </div>
+          {!isToday && onSupplement && (
+            <button
+              onClick={() => onSupplement(record.date)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-amber-200 bg-amber-50/60 text-amber-600 hover:bg-amber-100/60 transition-colors"
+              title={`为 ${formatDate(record.date)} 补录任务`}
+            >
+              <span className="text-sm leading-none">＋</span>
+              <span className="font-medium">补充任务</span>
+            </button>
+          )}
         </div>
       </div>
     );
@@ -272,6 +384,7 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
       record={record}
       moduleLabel={MODULE_LABELS[activeModule]}
       colorClasses={{ text: colors.text, solid: colors.solid }}
+      onSupplement={openSupplement}
     />
   );
 
@@ -530,6 +643,151 @@ export default function StudyRecords({ data, onUpdateData }: StudyRecordsProps) 
 
             <p className="text-center text-xs text-gray-400 mt-3">
               点击日期即可添加该日分页（仅可选今天及之前）
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ===== 补充任务弹窗 ===== */}
+      {supplementDate && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/40 flex items-end sm:items-center justify-center sm:p-4"
+          onClick={closeSupplement}
+        >
+          <div
+            className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-5 animate-[slideUp_.25s_ease-out]"
+            style={{ maxHeight: '85vh', overflowY: 'auto' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 标题 */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-semibold text-gray-800">
+                  补充学习任务
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  补录日期：<span className="text-amber-600 font-medium">{formatDate(supplementDate)}</span>
+                </p>
+              </div>
+              <button
+                onClick={closeSupplement}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500"
+                title="关闭"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 表单：科目 */}
+            <div className="mb-3.5">
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">科目</label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {subjects.map((s) => {
+                  const mc = MODULE_COLORS[s.id];
+                  const active = supplementModule === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setSupplementModule(s.id)}
+                      className={`py-2 rounded-xl text-xs font-medium transition-colors border ${
+                        active
+                          ? `${mc.solid} text-white border-transparent shadow-sm`
+                          : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      {s.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 表单：任务内容 */}
+            <div className="mb-3.5">
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                任务内容 <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                autoFocus
+                value={supplementContent}
+                onChange={(e) => setSupplementContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    // Ctrl/Cmd + Enter 快速保存
+                    saveSupplement();
+                  }
+                }}
+                rows={3}
+                placeholder="例如：英语阅读 Text 1 精翻 + 整理生词本"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50/60 focus:bg-white focus:border-amber-300 focus:ring-2 focus:ring-amber-100 outline-none transition-all text-sm resize-none"
+              />
+            </div>
+
+            {/* 表单：是否已完成 */}
+            <div className="mb-5 rounded-xl border border-gray-100 bg-amber-50/40 p-3">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <span className="relative inline-block w-5 h-5 flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={supplementDone}
+                    onChange={(e) => setSupplementDone(e.target.checked)}
+                    className="peer absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  <span
+                    className={`absolute inset-0 rounded-md border flex items-center justify-center transition-all ${
+                      supplementDone
+                        ? 'bg-amber-500 border-amber-500 text-white'
+                        : 'bg-white border-gray-300 peer-hover:border-amber-300'
+                    }`}
+                  >
+                    {supplementDone && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M5 13l4 4L19 7"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                </span>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-gray-700">
+                    这个任务 {supplementDone ? '昨天已经完成了 👍' : '昨天没完成，先记下来'}
+                  </div>
+                  <div className="text-[11px] text-gray-400 mt-0.5">
+                    {supplementDone
+                      ? '勾选后立即发放 +10 金币奖励（awardedTaskIds 防重复）'
+                      : '以后在首页或这里勾选完成再领金币'}
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            {/* 按钮组 */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                onClick={closeSupplement}
+                className="h-10.5 py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={saveSupplement}
+                disabled={!supplementContent.trim()}
+                className={`h-10.5 py-2.5 rounded-xl text-sm font-medium text-white transition-all ${
+                  supplementContent.trim()
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98]'
+                    : 'bg-gray-300 cursor-not-allowed'
+                }`}
+              >
+                保存并{supplementDone ? '领金币 +10' : '保存'}
+              </button>
+            </div>
+            <p className="text-center text-[11px] text-gray-400 mt-2">
+              提示：Ctrl/Cmd + Enter 可快速保存
             </p>
           </div>
         </div>

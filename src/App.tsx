@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { AppData, ModuleType } from './types';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { AppData, ModuleType, StudyPlan, PlanTask } from './types';
 import { loadData, saveData, autoBackupIfNeeded } from './utils/storage';
 import { sampleWords, sampleMemorizeItems, sampleNewsItems, sampleTemplates } from './data/defaults';
 import Dashboard from './pages/Dashboard';
@@ -14,13 +14,16 @@ import StudyRecords from './pages/StudyRecords';
 import Points from './pages/Points';
 import DataManager from './components/DataManager';
 import ScreenCapture from './components/ScreenCapture';
-import { FloatingPoints } from './components/FloatingPoints';
+import { FloatingPoints, emitFloatPoints } from './components/FloatingPoints';
 import { SplashScreen } from './components/SplashScreen';
-import { settleYesterdayIfNeeded } from './utils/pointsLogic';
+import { settleYesterdayIfNeeded, awardTaskDone } from './utils/pointsLogic';
 import { fetchDailyTheme, applyDefaultTheme } from './utils/dailyTheme';
 import { pickRandomQuote } from './utils/quotes';
 import { expForCurrentLevel, MAX_LEVEL } from './utils/levelSystem';
 import { HomeIcon, ChartIcon, CoinIcon, ChatIcon, BookIcon, UserIcon } from './components/Icons';
+import { todayStr } from './utils/date';
+import { getModuleLabels } from './utils/modules';
+import { TaskNotifications, ensureNotificationPermission } from './plugins/capacitorPlugins';
 
 type PageKey = 'dashboard' | 'english' | 'education' | 'politics' | 'aichat' | 'mypage' | 'resources' | 'records' | 'points';
 
@@ -141,6 +144,73 @@ export default function App() {
       setData(settled);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ===== 今日任务 → 手机通知栏（Capacitor 原生） =====
+  // 步骤 1：启动时尽力请求通知权限（Android 13+ 弹窗点"允许"才能真的显示）
+  useEffect(() => {
+    ensureNotificationPermission().catch(() => {});
+  }, []);
+
+  // 步骤 2：今日任务 / 学科配置变化时 → 推送到通知栏
+  const today = useMemo(() => todayStr(), []);
+  const todayPlan: StudyPlan | undefined = useMemo(() => {
+    return data.plans.find((p) => p.date === today);
+  }, [data.plans, today]);
+
+  // 上一次已同步的 task.id 集合指纹（避免每次 plans 小变动都触发一次 sync）
+  const lastSyncFingerprintRef = useRef<string>('');
+  useEffect(() => {
+    const moduleLabels = getModuleLabels(data.subjects);
+    const tasks = (todayPlan?.tasks ?? []).map((t, idx) => ({
+      taskId: t.id,
+      title: t.content,
+      module: (t.module && moduleLabels[t.module as ModuleType]) || '',
+      done: !!t.done,
+      index: idx + 1,
+    }));
+    // 指纹：按 id+done 生成字符串，完全一样就跳过
+    const fingerprint = tasks.map(t => `${t.taskId}|${t.done ? 1 : 0}`).join(';');
+    if (fingerprint === lastSyncFingerprintRef.current) return;
+    lastSyncFingerprintRef.current = fingerprint;
+    TaskNotifications.syncTasks(tasks).catch(() => {});
+  }, [todayPlan, data.subjects]);
+
+  // 步骤 3：用户在通知栏点「✓ 完成」→ 回调事件 → 把对应任务打勾并领金币
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const setDataRef = useRef<(next: AppData) => void>(() => {});
+  setDataRef.current = (next: AppData) => setData(next);
+
+  useEffect(() => {
+    const listener = TaskNotifications.addListener(async ({ taskId }) => {
+      try {
+        const cur = dataRef.current;
+        const tod = todayStr();
+        // 找今日计划里的对应任务
+        const plan = cur.plans.find(p => p.date === tod);
+        if (!plan) return;
+        const task = plan.tasks.find(t => t.id === taskId);
+        if (!task || task.done) return; // 已完成：awardedTaskIds 里已经发过，不再重复动效
+        const wasAwarded = cur.points.awardedTaskIds.includes(taskId);
+        // 翻转 done = true
+        const newTasks: PlanTask[] = plan.tasks.map(t =>
+          t.id === taskId ? { ...t, done: true } : t
+        );
+        const newPlans = cur.plans.map(p =>
+          p.date === tod ? { ...p, tasks: newTasks } : p
+        );
+        let next: AppData = { ...cur, plans: newPlans };
+        if (!wasAwarded) {
+          next = awardTaskDone(next, taskId);
+          emitFloatPoints(10, '完成任务');
+        }
+        setDataRef.current(next);
+      } catch (e) {
+        console.error('taskDoneFromNotification listener error:', e);
+      }
+    });
+    return () => { listener.remove?.().catch(() => {}); };
   }, []);
 
   // 监听全局右键

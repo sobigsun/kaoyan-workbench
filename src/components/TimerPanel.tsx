@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useTimer } from '../hooks/useTimer';
 import { AppData, ModuleType } from '../types';
 import { todayStr } from '../utils/date';
+import { Pomodoro } from '../plugins/capacitorPlugins';
 
 interface TaskTimerSync {
   content: string;
@@ -120,16 +121,114 @@ export default function TimerPanel({ data, onUpdateData, taskTimer }: TimerPanel
     });
   }, []);
 
+  const baseTimer = useTimer({ initialMinutes: 25, onComplete: handleComplete });
   const {
     timeLeft,
     isRunning,
     isBreak,
     completedCount,
-    start,
-    pause,
-    reset,
-    toggleBreak,
-  } = useTimer({ initialMinutes: 25, onComplete: handleComplete });
+    setCompletedCount,
+    minutes,
+    seconds,
+    endAt,
+  } = baseTimer;
+
+  // ===== 独立番茄钟：包装 start/pause/reset/toggleBreak，同时调用 Android 原生前台服务 =====
+  // 原生服务负责后台/锁屏时精确计时，前端 useTimer 负责界面显示与兜底
+  const wrapStart = useCallback(() => {
+    baseTimer.start();
+    const totalSec = isBreak ? breakMinutes * 60 : focusMinutes * 60;
+    const remainSec = totalSec; // start = 完整开始
+    Pomodoro.startTimer({
+      taskId: '',
+      taskTitle: '',
+      module: MODULE_LABELS[selectedModule],
+      totalSec,
+      remainSec,
+      isBreak,
+    }).catch(() => {});
+  }, [baseTimer, isBreak, breakMinutes, focusMinutes, selectedModule]);
+
+  const wrapPause = useCallback(() => {
+    baseTimer.pause();
+    Pomodoro.pauseTimer().catch(() => {});
+  }, [baseTimer]);
+
+  const wrapReset = useCallback((minutes?: number) => {
+    baseTimer.reset(minutes);
+    // 重置番茄钟 → 前台服务也一起停掉
+    Pomodoro.stopTimer().catch(() => {});
+  }, [baseTimer]);
+
+  const wrapToggleBreak = useCallback((opts?: { focusMinutes?: number; breakMinutes?: number }) => {
+    baseTimer.toggleBreak(opts);
+    // 切阶段 → 先停前台服务，等用户点开始时再启新的
+    Pomodoro.stopTimer().catch(() => {});
+  }, [baseTimer]);
+
+  // 原生前台服务走完后会触发事件，即使 JS 被冻住没赶上 onComplete，这里也能兜底再触发一次
+  // （handleComplete 内部写记录是幂等的，不会重复记录一条番茄钟的完成，completedCount 是另外的计数）
+  useEffect(() => {
+    const h = Pomodoro.addListener(({ taskId: _taskId }) => {
+      // 把 isRunning 设为 false 并触发完成回调
+      try {
+        handleComplete();
+        if (!isBreak) {
+          setCompletedCount((c) => c + 1);
+        }
+      } catch (e) {
+        console.error('pomodoroComplete listener error', e);
+      }
+    });
+    return () => { h.remove?.().catch(() => {}); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBreak]);
+
+  // ===== 任务同步模式：taskTimer 的开始/暂停/继续/停止 → 同步原生前台服务 =====
+  // （保证同步模式下的倒计时在后台也能准确走完）
+  const lastTaskStartKey = useRef<string>('');
+  useEffect(() => {
+    if (!isSyncMode || !taskTimer) return;
+    // 用 (taskId + isRunning + hasFinished) 作为事件 key，避免重复下发
+    const tt = taskTimer;
+    const key = `${tt.content}|${tt.module}|${tt.remainingSec}|${tt.progress}|${tt.isRunning}|${tt.hasFinished}`;
+    if (key === lastTaskStartKey.current) return;
+    lastTaskStartKey.current = key;
+
+    const totalSec = Math.max(1, Math.round((tt.durationSec ?? 0) / 1) || 1);
+    const remainSec = Math.max(1, tt.remainingSec);
+    if (tt.isRunning && !tt.hasFinished) {
+      Pomodoro.startTimer({
+        taskId: `sync:${tt.module}:${tt.content}`,
+        taskTitle: tt.content,
+        module: MODULE_LABELS[tt.module],
+        totalSec,
+        remainSec,
+        isBreak: false,
+      }).catch(() => {});
+    } else if (tt.hasFinished) {
+      Pomodoro.stopTimer().catch(() => {});
+    } else {
+      Pomodoro.pauseTimer().catch(() => {});
+    }
+  }, [
+    isSyncMode,
+    taskTimer,
+    taskTimer?.content,
+    taskTimer?.module,
+    taskTimer?.isRunning,
+    taskTimer?.hasFinished,
+    taskTimer?.remainingSec,
+    taskTimer?.progress,
+    taskTimer?.durationSec,
+  ]);
+
+  // 组件卸载 / 切换面板 时，避免前台服务残留
+  useEffect(() => {
+    return () => {
+      Pomodoro.stopTimer().catch(() => {});
+    };
+  }, []);
 
   // 圆形进度条参数
   const circumference = 2 * Math.PI * 80;
@@ -270,14 +369,8 @@ export default function TimerPanel({ data, onUpdateData, taskTimer }: TimerPanel
               if (isRunning) return;
               if (m < 1 || m > 600) return;
               setMins(m);
-              // 同步重置 timeLeft 到新的时间
-              if (isBreak) {
-                reset(m);
-              } else {
-                // 当前是专注模式：直接 reset(m) 即可
-                // reset 会把 isBreak 设为 false，这里本来就是 false，所以没问题
-                reset(m);
-              }
+              // 同步重置 timeLeft 到新的时间，并停止前台服务
+              wrapReset(m);
             };
 
             const applyCustom = () => {
@@ -289,7 +382,7 @@ export default function TimerPanel({ data, onUpdateData, taskTimer }: TimerPanel
 
             const toggleMode = () => {
               if (isRunning) return;
-              toggleBreak({ focusMinutes, breakMinutes });
+              wrapToggleBreak({ focusMinutes, breakMinutes });
             };
 
             return (
@@ -420,23 +513,23 @@ export default function TimerPanel({ data, onUpdateData, taskTimer }: TimerPanel
       ) : (
         <div className="flex gap-3 flex-wrap justify-center">
           {!isRunning && timeLeft > 0 && (
-            <button onClick={start} className="px-6 py-2 bg-primary-500 text-white rounded-full text-sm font-medium hover:bg-primary-600">
+            <button onClick={wrapStart} className="px-6 py-2 bg-primary-500 text-white rounded-full text-sm font-medium hover:bg-primary-600">
               开始
             </button>
           )}
           {isRunning && (
-            <button onClick={pause} className="px-6 py-2 bg-yellow-500 text-white rounded-full text-sm font-medium hover:bg-yellow-600">
+            <button onClick={wrapPause} className="px-6 py-2 bg-yellow-500 text-white rounded-full text-sm font-medium hover:bg-yellow-600">
               暂停
             </button>
           )}
           <button
-            onClick={() => reset(isBreak ? breakMinutes : focusMinutes)}
+            onClick={() => wrapReset(isBreak ? breakMinutes : focusMinutes)}
             className="px-6 py-2 bg-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-300"
           >
             重置
           </button>
           <button
-            onClick={() => toggleBreak({ focusMinutes, breakMinutes })}
+            onClick={() => wrapToggleBreak({ focusMinutes, breakMinutes })}
             className="px-6 py-2 bg-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-300"
           >
             {isBreak ? '切换到专注' : '切换到休息'}
