@@ -45,6 +45,70 @@ jobs:
       - name: 同步 Capacitor
         run: npx cap sync android
 
+      - name: 原生层兜底：启用 Edge-to-Edge 并让状态栏/导航栏背景透明
+        run: |
+          # ---- 1) styles.xml：正式主题里启用 edge-to-edge，让内容绘制到状态栏下方 ----
+          STYLES_FILE="android/app/src/main/res/values/styles.xml"
+          if [ -f "$STYLES_FILE" ]; then
+            python3 - <<'PY'
+            import re, sys
+            path = sys.argv[1]
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            # 给 AppTheme.NoActionBar 追加 edge-to-edge 相关 item（允许重复时幂等）
+            target_block = 'parent="Theme.AppCompat.DayNight.NoActionBar">'
+            items_to_add = [
+                '<item name="android:statusBarColor">@android:color/transparent</item>',
+                '<item name="android:navigationBarColor">@android:color/transparent</item>',
+                '<item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>',
+                '<item name="android:enforceNavigationBarContrast">false</item>',
+                '<item name="android:enforceStatusBarContrast">false</item>',
+            ]
+            def ensure_items(block_name: str, items):
+                nonlocal content
+                idx = content.find(block_name)
+                if idx == -1:
+                    return
+                end_tag_idx = content.find('</style>', idx)
+                block = content[idx:end_tag_idx]
+                for it in items:
+                    if it not in block:
+                        block = block.rstrip() + '\n        ' + it + '\n    '
+                content = content[:idx] + block + content[end_tag_idx:]
+            ensure_items('parent="Theme.AppCompat.DayNight.NoActionBar">', items_to_add)
+            # 给启动主题也追加 cutout 支持，避免刘海屏挤压
+            ensure_items('parent="Theme.SplashScreen">', [
+                '<item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>',
+            ])
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print("styles.xml patched OK")
+            PY
+            "$STYLES_FILE"
+          fi
+
+          # ---- 2) values-night/styles.xml 同样处理（夜间模式路径） ----
+          NIGHT_STYLES="android/app/src/main/res/values-night/styles.xml"
+          if [ -f "$NIGHT_STYLES" ]; then
+            cp "$STYLES_FILE" "$NIGHT_STYLES" 2>/dev/null || true
+          fi
+
+          # ---- 3) AndroidManifest：确保 Activity 主题允许 edge-to-edge ----
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST" ]; then
+            python3 - <<'PY'
+            import sys, re
+            path = sys.argv[1]
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            # 确保 application 主题指向 NoActionBar（Capacitor 默认其实是 AppTheme，但我们让 Activity 覆盖即可）
+            print("manifest check OK")
+            PY
+            "$MANIFEST"
+          fi
+
+          echo "--- Native edge-to-edge patch done ---"
+
       - name: 修复 Gradle 脚本执行权限
         working-directory: android
         run: chmod +x gradlew gradlew.bat

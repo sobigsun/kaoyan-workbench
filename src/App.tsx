@@ -220,8 +220,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
-      {/* 顶部导航 */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
+      {/* 顶部导航：自身撑出安全区高度，防止与手机状态栏（电量/信号/刘海）重叠 */}
+      <header
+        className="sticky z-40 bg-white border-b border-gray-100"
+        style={{
+          top: 0,
+          paddingTop: 'var(--safe-top, 0px)',
+          boxSizing: 'border-box',
+        }}
+      >
         <div className="max-w-lg mx-auto px-4 h-12 flex items-center justify-between">
           {/* 桌面端：汉堡菜单 */}
           <button

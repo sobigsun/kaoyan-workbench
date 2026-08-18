@@ -47,6 +47,26 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ===== 移动端安全区 / 状态栏适配 ===== */
+/*
+ * 说明：
+ * 1) env(safe-area-inset-*) 在 iOS 以及启用了 edge-to-edge 的 Android WebView 中会注入真实值。
+ * 2) 默认 Capacitor Android 未启用 edge-to-edge，env 值为 0，因此用 28px 作为状态栏高度回退，
+ *    避免内容与手机状态栏（电量/信号/刘海）重叠。
+ * 3) max() 会取两者中较大者：edge-to-edge 时取 env，普通模式下取 28px，双端自适应。
+ */
+:root {
+  --safe-top: max(env(safe-area-inset-top, 0px), 28px);
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* html/body 全局背景色，让状态栏下方区域也显示页面底色（避免出现黑色间隙） */
+html, body, #root {
+  background-color: var(--bg-page, #F2E8DA);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
@@ -54,14 +74,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-page, #F2E8DA);
   color: var(--text-primary, #2A2218);
-  /* 移动端安全区域 */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  /* 全局顶部安全区（第一层） */
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+  min-height: 100vh;
+  min-height: 100dvh; /* 移动端动态视口高度，避免地址栏挤压 */
+  box-sizing: border-box;
+}
+
+/* App 根容器（第二层，防止 body padding 在某些平台失效） */
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
+
+/* 页面顶部导航栏：再加一层保险，自身也撑出安全区高度 */
+.safe-top-header {
+  padding-top: var(--safe-top);
+  /* 如果已有 padding-top，叠加时用以下写法（此处是额外一层独立 header） */
 }
 
 /* 移动端底部导航栏 */
 .mobile-nav {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
 }
 
 /* 触摸优化：增大点击区域 */
