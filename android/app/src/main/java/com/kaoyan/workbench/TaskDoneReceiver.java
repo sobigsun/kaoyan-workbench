@@ -34,7 +34,7 @@ public class TaskDoneReceiver extends BroadcastReceiver {
             try {
                 JSObject data = new JSObject();
                 data.put("taskId", taskId);
-                p.notifyListeners(TaskNotificationsPlugin.EVENT_TASK_DONE, data);
+                p.emitEvent(TaskNotificationsPlugin.EVENT_TASK_DONE, data);
             } catch (Exception ignore) { }
         } else {
             // 插件尚未加载：把 taskId 暂存，等插件 load() 时补发

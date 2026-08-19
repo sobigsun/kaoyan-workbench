@@ -47,6 +47,17 @@ public class TaskNotificationsPlugin extends Plugin {
 
     public TaskNotificationsPlugin() { sharedInstance = this; }
 
+    /**
+     * 公开版 notifyListeners：用于外部类（如 TaskDoneReceiver）触发事件。
+     * 因为 Plugin.notifyListeners(String, JSObject) 是 protected，
+     * 非子类无法直接访问，所以在这里包一层。
+     */
+    public void emitEvent(String eventName, JSObject data) {
+        try {
+            notifyListeners(eventName, data);
+        } catch (Exception ignore) { }
+    }
+
     @Override public void load() {
         sharedInstance = this;
         ensureChannel();
@@ -58,7 +69,7 @@ public class TaskNotificationsPlugin extends Plugin {
             try {
                 JSObject data = new JSObject();
                 data.put("taskId", tid);
-                notifyListeners(EVENT_TASK_DONE, data);
+                emitEvent(EVENT_TASK_DONE, data);
             } catch (Exception ignore) { }
         }
         super.load();

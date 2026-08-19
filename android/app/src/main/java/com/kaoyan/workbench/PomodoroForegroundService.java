@@ -183,9 +183,8 @@ public class PomodoroForegroundService extends Service {
         // 在通知右侧的 bigText 样式上也能看到进度
         b.setStyle(new NotificationCompat.BigTextStyle().bigText(body));
         Notification notif = b.build();
-        // 手动设置 chronometer（系统原生计时显示）— 不依赖秒级 setText 刷新
-        notif.chronometerOptions =
-                (android.app.Notification.CHRONOMETER_SHOW_WHEN_STOPPED);
+        // 注：Notification.chronometerOptions / CHRONOMETER_SHOW_WHEN_STOPPED 是 Android 14 (API 34) 才有的 API
+        //    这里不使用，因为我们已经通过 setProgress + setContentText 每秒手动更新进度显示，兼容性更好
         return notif;
     }
 
