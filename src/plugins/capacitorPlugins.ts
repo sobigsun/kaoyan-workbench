@@ -11,7 +11,19 @@
  *   3) Misc —— 请求通知权限（POST_NOTIFICATIONS）
  */
 
-import { Capacitor, Plugins, registerPlugin, PluginListenerHandle } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+
+/** 与 @capacitor/core 的 PluginListenerHandle 结构完全一致，内联定义避免 TS 值导入报错 */
+interface PluginListenerHandle {
+  remove: () => Promise<void>;
+}
+
+/** 获取全局插件注册表（等价于旧版 Capacitor 的 Plugins 导出） */
+function getPluginsRegistry(): Record<string, any> {
+  const capAny = Capacitor as unknown as { Plugins?: Record<string, any> };
+  if (!capAny.Plugins) capAny.Plugins = {};
+  return capAny.Plugins;
+}
 
 // ============================================================
 // 1) Pomodoro 插件（对应 android/.../PomodoroPlugin.java）
@@ -34,7 +46,7 @@ const PomodoroNativePlugin = /*#__PURE__*/ (() => {
   if (!Capacitor.isNativePlatform()) return null;
   try {
     // 优先使用已注册过的插件（比如 MainActivity.registerPlugin 那批）
-    const anyPlugins = Plugins as unknown as Record<string, PomodoroNative | undefined>;
+    const anyPlugins = getPluginsRegistry() as Record<string, PomodoroNative | undefined>;
     if (anyPlugins.Pomodoro) return anyPlugins.Pomodoro;
     // 兜底：用 registerPlugin 手动再建一个（空插件）
     return registerPlugin<PomodoroNative>('Pomodoro', { web: () => new NoopPomodoro() });
@@ -114,7 +126,7 @@ interface TaskNotificationsNative {
 const TaskNotificationsNativePlugin = /*#__PURE__*/ (() => {
   if (!Capacitor.isNativePlatform()) return null;
   try {
-    const anyPlugins = Plugins as unknown as Record<string, TaskNotificationsNative | undefined>;
+    const anyPlugins = getPluginsRegistry() as Record<string, TaskNotificationsNative | undefined>;
     if (anyPlugins.TaskNotifications) return anyPlugins.TaskNotifications;
     return registerPlugin<TaskNotificationsNative>('TaskNotifications', { web: () => new NoopTaskNotifs() });
   } catch (e) {
@@ -175,7 +187,7 @@ export async function ensureNotificationPermission(): Promise<boolean> {
   }
   // 原生：尝试使用官方 @capacitor/local-notifications 插件的 requestPermissions
   try {
-    const anyPlugins = Plugins as unknown as Record<string, any>;
+    const anyPlugins = getPluginsRegistry() as Record<string, any>;
     if (anyPlugins.LocalNotifications) {
       const r = await anyPlugins.LocalNotifications.requestPermissions?.();
       if (r && typeof r.display === 'string') return r.display === 'granted';
