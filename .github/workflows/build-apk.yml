@@ -52,6 +52,13 @@ jobs:
         working-directory: android
         run: chmod +x gradlew gradlew.bat
 
+      - name: 安装固定签名 debug keystore（签名一致可覆盖安装，不再需要卸载）
+        run: |
+          mkdir -p "$HOME/.android"
+          cp .github/signing/debug.keystore "$HOME/.android/debug.keystore"
+          chmod 600 "$HOME/.android/debug.keystore"
+          echo "已安装固定签名 keystore：所有后续构建 APK 签名完全一致，可直接覆盖安装"
+
       - name: 构建 Debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
